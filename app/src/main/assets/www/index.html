@@ -1,0 +1,3051 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>EnerShip Travel</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CSS RESET & VARIABLES
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+:root {
+  --bg: #0B1929;
+  --surface: #112240;
+  --card: #1A3050;
+  --card-hover: #1F3A5A;
+  --text: #FFFFFF;
+  --text-dim: #A8B2C1;
+  --accent: #00D4FF;
+  --accent-dim: rgba(0,212,255,0.15);
+  --danger: #FF4D6A;
+  --danger-dim: rgba(255,77,106,0.15);
+  --warning: #FFB300;
+  --warning-dim: rgba(255,179,0,0.15);
+  --success: #00E676;
+  --success-dim: rgba(0,230,118,0.15);
+  --sidebar-bg: #0a1520;
+  --sidebar-w: 72px;
+  --header-h: 56px;
+  --footer-h: 32px;
+  --font-heading: 'Exo 2', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  --transition: 0.2s ease;
+}
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--card-hover); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.app-layout {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  border-right: 1px solid rgba(0,212,255,0.1);
+  z-index: 100;
+}
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-logo svg { width: 32px; height: 32px; }
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+.nav-item {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+}
+.nav-item:hover {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.nav-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  box-shadow: 0 0 12px rgba(0,212,255,0.3);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+.nav-item svg { width: 22px; height: 22px; margin-bottom: 2px; }
+.nav-item span {
+  font-size: 9px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  animation: pulse-badge 1.5s ease infinite;
+}
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.sidebar-bt {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+.bt-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 2px solid rgba(255,255,255,0.1);
+  transition: background var(--transition);
+}
+.bt-indicator.connected { background: var(--success); }
+.bt-indicator.reconnecting { background: var(--warning); animation: blink 1s ease infinite; }
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.bt-label {
+  font-size: 8px;
+  color: var(--text-dim);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Main area */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Header */
+.header {
+  height: var(--header-h);
+  min-height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 1px solid rgba(0,212,255,0.1);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+}
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+}
+.header-title svg { width: 24px; height: 24px; color: var(--accent); }
+.header-spacer { flex: 1; }
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-frames {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  display: flex;
+  gap: 10px;
+}
+.frame-counter {
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--card);
+}
+.frame-counter.rx { color: var(--success); }
+.frame-counter.err { color: var(--danger); }
+.header-bt-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0,212,255,0.3);
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.header-bt-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.header-bt-btn.connected {
+  background: var(--success-dim);
+  border-color: var(--success);
+  color: var(--success);
+}
+.header-bt-btn svg { width: 18px; height: 18px; }
+.header-conn-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+}
+
+/* Footer */
+.footer {
+  height: var(--footer-h);
+  min-height: var(--footer-h);
+  background: var(--surface);
+  border-top: 1px solid rgba(0,212,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* ============================================================
+   TAB PANELS (hidden/shown)
+   ============================================================ */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ============================================================
+   ALARM BANNER (top of dashboard)
+   ============================================================ */
+.alarm-banner {
+  display: none;
+  background: linear-gradient(135deg, rgba(255,77,106,0.25), rgba(255,77,106,0.1));
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  animation: banner-glow 2s ease infinite;
+}
+.alarm-banner.visible { display: flex; align-items: center; gap: 12px; }
+@keyframes banner-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,77,106,0.2); }
+  50% { box-shadow: 0 0 20px rgba(255,77,106,0.4); }
+}
+.alarm-banner-icon { color: var(--danger); }
+.alarm-banner-icon svg { width: 24px; height: 24px; }
+.alarm-banner-text {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--danger);
+  font-size: 14px;
+}
+.alarm-banner-count {
+  background: var(--danger);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ============================================================
+   CARDS & GAUGES
+   ============================================================ */
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--accent);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title svg { width: 18px; height: 18px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.card-grid.engine-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+.gauge-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px;
+  transition: all var(--transition);
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+.gauge-card:hover {
+  background: var(--card-hover);
+  border-color: rgba(0,212,255,0.15);
+}
+.gauge-card.warning {
+  border-color: var(--warning);
+  box-shadow: 0 0 10px rgba(255,179,0,0.15);
+}
+.gauge-card.danger {
+  border-color: var(--danger);
+  box-shadow: 0 0 10px rgba(255,77,106,0.2);
+  animation: card-danger-pulse 2s ease infinite;
+}
+@keyframes card-danger-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(255,77,106,0.15); }
+  50% { box-shadow: 0 0 18px rgba(255,77,106,0.35); }
+}
+.gauge-card-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gauge-card-value {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.gauge-card-value.warn-val { color: var(--warning); }
+.gauge-card-value.danger-val { color: var(--danger); }
+.gauge-card-unit {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+.gauge-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.gauge-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.4s ease, background 0.4s ease;
+  min-width: 0;
+}
+.gauge-bar-fill.warn-fill { background: var(--warning); }
+.gauge-bar-fill.danger-fill { background: var(--danger); }
+
+/* GPS section */
+.gps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.gps-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.gps-card-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.gps-card-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.gps-card-value.no-fix { color: var(--text-dim); }
+.gps-fix-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+.gps-fix-badge.has-fix {
+  background: var(--success-dim);
+  color: var(--success);
+}
+.gps-fix-badge.no-fix {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+.gps-fix-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ============================================================
+   ALARMS TAB
+   ============================================================ */
+.alarm-section { margin-bottom: 24px; }
+.alarm-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.alarm-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+.alarm-type-P_LOW { background: rgba(255,77,106,0.15); color: var(--danger); }
+.alarm-type-P_HIGH { background: rgba(255,77,106,0.15); color: var(--danger); }
+.alarm-type-T_HIGH { background: rgba(255,179,0,0.15); color: var(--warning); }
+.alarm-type-NC_LOW { background: rgba(0,212,255,0.15); color: var(--accent); }
+.alarm-type-NR_LOW { background: rgba(0,230,118,0.15); color: var(--success); }
+.alarm-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.alarm-list { display: flex; flex-direction: column; gap: 8px; }
+.alarm-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--danger);
+}
+.alarm-entry.alarm-entry-T_HIGH { border-left-color: var(--warning); }
+.alarm-entry.alarm-entry-NC_LOW { border-left-color: var(--accent); }
+.alarm-entry.alarm-entry-NR_LOW { border-left-color: var(--success); }
+.alarm-entry-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.alarm-entry-info { flex: 1; }
+.alarm-entry-type {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 13px;
+}
+.alarm-entry-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.alarm-entry-actions { display: flex; gap: 6px; }
+.btn-sm {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.btn-sm.ack {
+  background: var(--warning-dim);
+  color: var(--warning);
+}
+.btn-sm.ack:hover { background: var(--warning); color: #000; }
+.btn-sm.clear {
+  background: var(--success-dim);
+  color: var(--success);
+}
+.btn-sm.clear:hover { background: var(--success); color: #000; }
+
+.btn-danger {
+  background: var(--danger-dim);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.btn-danger:hover {
+  background: var(--danger);
+  color: #fff;
+}
+.no-alarms-msg {
+  text-align: center;
+  padding: 32px;
+  color: var(--text-dim);
+  font-family: var(--font-heading);
+}
+
+/* ============================================================
+   CHARTS TAB
+   ============================================================ */
+.chart-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.channel-selector {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 4px;
+  width: 100%;
+}
+.channel-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  transition: all var(--transition);
+}
+.channel-checkbox:hover {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+.channel-checkbox input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.time-range-selector {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.time-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0,212,255,0.2);
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.time-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.time-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.chart-export-btns {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.btn-export {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0,212,255,0.3);
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-export:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.chart-canvas-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.chart-canvas-wrap canvas {
+  width: 100%;
+  height: 300px;
+  display: block;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+}
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+}
+.chart-legend-swatch {
+  width: 12px;
+  height: 3px;
+  border-radius: 1px;
+}
+
+/* ============================================================
+   CONFIG TAB
+   ============================================================ */
+.config-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.config-row {
+  margin-bottom: 24px;
+}
+.config-row:last-child { margin-bottom: 0; }
+.config-label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.config-label-unit {
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 400;
+}
+.config-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.config-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.08);
+  outline: none;
+}
+.config-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 8px rgba(0,212,255,0.4);
+}
+.config-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+.config-num-input {
+  width: 80px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0,212,255,0.2);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+.config-num-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(0,212,255,0.2);
+}
+.config-applied {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+.config-applied span { color: var(--success); }
+.config-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.btn-primary:hover { background: #33DDFF; box-shadow: 0 0 12px rgba(0,212,255,0.4); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary {
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0,212,255,0.3);
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-secondary:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+/* ============================================================
+   DIAGNOSTICS TAB
+   ============================================================ */
+.diag-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 800px) {
+  .diag-grid { grid-template-columns: 1fr; }
+}
+.diag-panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.diag-panel-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.frame-log {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.frame-log-entry { display: flex; gap: 6px; align-items: flex-start; }
+.frame-log-badge {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 26px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.frame-log-badge.rx { background: var(--success-dim); color: var(--success); }
+.frame-log-badge.tx { background: var(--accent-dim); color: var(--accent); }
+.frame-log-badge.alarm { background: var(--danger-dim); color: var(--danger); }
+.frame-log-badge.sys { background: var(--warning-dim); color: var(--warning); }
+.frame-log-text {
+  color: var(--text-dim);
+  word-break: break-all;
+}
+.conn-log {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.conn-log-entry {
+  color: var(--text-dim);
+  display: flex;
+  gap: 6px;
+}
+.conn-log-time { color: var(--accent); white-space: nowrap; }
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.stat-item {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 2px;
+}
+.diag-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  transition: var(--transition);
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  transition: var(--transition);
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent-dim);
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+  background: var(--accent);
+}
+.toggle-label {
+  font-size: 13px;
+  font-family: var(--font-heading);
+  color: var(--text-dim);
+}
+
+/* ============================================================
+   MODAL (confirmation dialog)
+   ============================================================ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.visible { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+.modal-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+.modal-body {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.modal-body strong { color: var(--text); }
+.modal-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ============================================================
+   BT DEVICE PICKER MODAL
+   ============================================================ */
+.bt-device-list {
+  max-height: 250px;
+  overflow-y: auto;
+  margin: 12px 0;
+}
+.bt-device-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.bt-device-item:hover {
+  background: var(--accent-dim);
+}
+.bt-device-item .bt-device-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+}
+.bt-device-item .bt-device-addr {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.no-devices-msg {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-dim);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 600px) {
+  .card-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .card-grid.engine-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .header-title span { display: none; }
+  .gps-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}
+</style>
+</head>
+<body>
+<!-- ============================================================
+     APP LAYOUT
+     ============================================================ -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 20h20"/>
+        <path d="M5 20V8l7-5 7 5v12"/>
+        <path d="M9 20v-6h6v6"/>
+        <path d="M12 3v3"/>
+        <path d="M3 20l9-14 9 14" stroke-opacity="0.4" stroke-dasharray="2 3"/>
+      </svg>
+    </div>
+    <div class="sidebar-nav">
+      <!-- Dashboard -->
+      <button class="nav-item active" data-tab="dashboard" title="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span>Dash</span>
+      </button>
+      <!-- Alarms -->
+      <button class="nav-item" data-tab="alarms" title="Alarms">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span>Alarm</span>
+        <div class="nav-badge" id="alarmBadge" style="display:none;">0</div>
+      </button>
+      <!-- Charts -->
+      <button class="nav-item" data-tab="charts" title="Charts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <span>Chart</span>
+      </button>
+      <!-- Config -->
+      <button class="nav-item" data-tab="config" title="Config">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>Config</span>
+      </button>
+      <!-- Diagnostics -->
+      <button class="nav-item" data-tab="diagnostics" title="Diagnostics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 17 10 11 4 5"/>
+          <line x1="12" y1="19" x2="20" y2="19"/>
+        </svg>
+        <span>Diag</span>
+      </button>
+    </div>
+    <div class="sidebar-bt">
+      <div class="bt-indicator" id="btIndicator"></div>
+      <div class="bt-label" id="btLabel">No BT</div>
+    </div>
+  </nav>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 20h20"/>
+          <path d="M5 20V8l7-5"/>
+          <path d="M19 20V8l-7-5"/>
+          <path d="M9 20v-4h6v4"/>
+        </svg>
+        <span>EnerShip Travel</span>
+      </div>
+      <div class="header-spacer"></div>
+      <div class="header-status">
+        <div class="header-frames">
+          <span class="frame-counter rx" id="frameRx">RX: 0</span>
+          <span class="frame-counter err" id="frameErr">ERR: 0</span>
+        </div>
+        <div class="header-conn-text" id="headerConnText">Disconnected</div>
+        <button class="header-bt-btn" id="btBtn" title="Bluetooth">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
+          </svg>
+          <span id="btBtnText">Connect</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ==================== DASHBOARD TAB ==================== -->
+      <div class="tab-panel active" id="tab-dashboard">
+        <!-- Alarm banner -->
+        <div class="alarm-banner" id="alarmBanner">
+          <div class="alarm-banner-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+          <div class="alarm-banner-text" id="alarmBannerText">ACTIVE ALARMS</div>
+          <div class="alarm-banner-count" id="alarmBannerCount">0</div>
+        </div>
+
+        <!-- Current channels -->
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Currents
+        </div>
+        <div class="card-grid" id="currentCards"></div>
+
+        <!-- Voltage channels -->
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Voltages
+        </div>
+        <div class="card-grid" id="voltageCards"></div>
+
+        <!-- Engine data -->
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Engine
+        </div>
+        <div class="card-grid engine-grid" id="engineCards"></div>
+
+        <!-- GPS data -->
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+          GPS
+        </div>
+        <div class="gps-grid" id="gpsCards"></div>
+      </div>
+
+      <!-- ==================== ALARMS TAB ==================== -->
+      <div class="tab-panel" id="tab-alarms">
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Alarm Management
+        </div>
+
+        <div class="alarm-legend">
+          <div class="alarm-legend-item alarm-type-P_LOW"><span class="alarm-dot"></span>P_LOW &mdash; Low Pressure</div>
+          <div class="alarm-legend-item alarm-type-P_HIGH"><span class="alarm-dot"></span>P_HIGH &mdash; High Pressure</div>
+          <div class="alarm-legend-item alarm-type-T_HIGH"><span class="alarm-dot"></span>T_HIGH &mdash; High Temp</div>
+          <div class="alarm-legend-item alarm-type-NC_LOW"><span class="alarm-dot"></span>NC_LOW &mdash; Low Fuel</div>
+          <div class="alarm-legend-item alarm-type-NR_LOW"><span class="alarm-dot"></span>NR_LOW &mdash; Low Coolant</div>
+        </div>
+
+        <div class="alarm-section">
+          <div class="section-title" style="font-size:13px;">Active Alarms</div>
+          <div class="alarm-list" id="activeAlarmsList">
+            <div class="no-alarms-msg">No active alarms</div>
+          </div>
+        </div>
+
+        <div class="alarm-section">
+          <div class="section-title" style="font-size:13px;">Alarm History</div>
+          <div class="alarm-list" id="alarmHistoryList">
+            <div class="no-alarms-msg">No alarm history</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <button class="btn-danger" id="resetAlarmBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            Reset Alarm Buzzer
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== CHARTS TAB ==================== -->
+      <div class="tab-panel" id="tab-charts">
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Historical Charts
+        </div>
+
+        <div class="chart-controls">
+          <div class="channel-selector" id="channelSelector"></div>
+        </div>
+
+        <div class="time-range-selector">
+          <button class="time-btn active" data-range="30">30s</button>
+          <button class="time-btn" data-range="60">1m</button>
+          <button class="time-btn" data-range="120">2m</button>
+          <button class="time-btn" data-range="300">5m</button>
+        </div>
+
+        <div class="chart-export-btns">
+          <button class="btn-export" id="exportCsvBtn">Export CSV</button>
+          <button class="btn-export" id="exportJsonBtn">Export JSON</button>
+        </div>
+
+        <div class="chart-canvas-wrap">
+          <canvas id="chartCanvas"></canvas>
+          <div class="chart-legend" id="chartLegend"></div>
+        </div>
+      </div>
+
+      <!-- ==================== CONFIG TAB ==================== -->
+      <div class="tab-panel" id="tab-config">
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Threshold Configuration
+        </div>
+
+        <div class="config-section">
+          <div class="config-row">
+            <div class="config-label">
+              Temperature Threshold <span class="config-label-unit">(SEUIL_TEMP_MAX)</span>
+            </div>
+            <div class="config-slider-row">
+              <input type="range" class="config-slider" id="cfgTempSlider" min="0" max="150" step="0.5" value="95">
+              <input type="number" class="config-num-input" id="cfgTempInput" min="0" max="150" step="0.5" value="95">
+              <span style="color:var(--text-dim);font-size:12px;">°C</span>
+            </div>
+            <div class="config-applied">Applied: <span id="cfgTempApplied">95.0</span> °C</div>
+          </div>
+
+          <div class="config-row">
+            <div class="config-label">
+              Pressure Min Threshold <span class="config-label-unit">(SEUIL_PRESSION_MIN)</span>
+            </div>
+            <div class="config-slider-row">
+              <input type="range" class="config-slider" id="cfgPressSlider" min="0" max="10" step="0.1" value="1.5">
+              <input type="number" class="config-num-input" id="cfgPressInput" min="0" max="10" step="0.1" value="1.5">
+              <span style="color:var(--text-dim);font-size:12px;">PSI</span>
+            </div>
+            <div class="config-applied">Applied: <span id="cfgPressApplied">1.5</span> PSI</div>
+          </div>
+
+          <div class="config-row">
+            <div class="config-label">
+              Fuel Level Min Threshold <span class="config-label-unit">(SEUIL_CARBU_MIN)</span>
+            </div>
+            <div class="config-slider-row">
+              <input type="range" class="config-slider" id="cfgCarbuSlider" min="0" max="100" step="1" value="10">
+              <input type="number" class="config-num-input" id="cfgCarbuInput" min="0" max="100" step="1" value="10">
+              <span style="color:var(--text-dim);font-size:12px;">%</span>
+            </div>
+            <div class="config-applied">Applied: <span id="cfgCarbuApplied">10</span> %</div>
+          </div>
+
+          <div class="config-btns">
+            <button class="btn-primary" id="cfgApplyBtn">Apply Thresholds</button>
+            <button class="btn-secondary" id="cfgGetBtn">Get Config</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== DIAGNOSTICS TAB ==================== -->
+      <div class="tab-panel" id="tab-diagnostics">
+        <div class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          Diagnostics
+        </div>
+
+        <div class="diag-grid">
+          <!-- Frame Inspector -->
+          <div class="diag-panel">
+            <div class="diag-panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Frame Inspector
+            </div>
+            <div class="frame-log" id="frameLog"></div>
+          </div>
+
+          <!-- Connection Log -->
+          <div class="diag-panel">
+            <div class="diag-panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+              Connection Log
+            </div>
+            <div class="conn-log" id="connLog"></div>
+          </div>
+
+          <!-- Statistics -->
+          <div class="diag-panel">
+            <div class="diag-panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+              Statistics
+            </div>
+            <div class="stat-grid">
+              <div class="stat-item">
+                <div class="stat-label">Frames Received</div>
+                <div class="stat-value" id="statRx">0</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Frames Rejected</div>
+                <div class="stat-value" id="statErr">0</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Data Rate</div>
+                <div class="stat-value" id="statRate">0 <small style="font-size:10px;">f/m</small></div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Error Rate</div>
+                <div class="stat-value" id="statErrorRate">0%</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Uptime</div>
+                <div class="stat-value" id="statUptime">0:00</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Last Frame</div>
+                <div class="stat-value" id="statLastFrame" style="font-size:12px;">--</div>
+              </div>
+            </div>
+            <div class="diag-actions">
+              <button class="btn-secondary" id="diagPingBtn" style="padding:6px 16px;font-size:12px;">Ping</button>
+              <button class="btn-secondary" id="diagClearBtn" style="padding:6px 16px;font-size:12px;">Clear Logs</button>
+            </div>
+          </div>
+
+          <!-- Connection Settings -->
+          <div class="diag-panel">
+            <div class="diag-panel-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Connection Settings
+            </div>
+            <div class="toggle-row">
+              <label class="toggle-switch">
+                <input type="checkbox" id="autoReconnectToggle" checked>
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">Auto-Reconnect</span>
+            </div>
+            <div style="margin-top:14px;">
+              <div style="font-size:11px;color:var(--text-dim);font-family:var(--font-heading);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Connection Stats</div>
+              <div id="connStatsDisplay" style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);line-height:1.8;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>EnerShip Travel v1.0 &bull; Protocol: $DATA (28 fields)</span>
+      <span>HC-06 &bull; 9600 baud</span>
+    </footer>
+  </div><!-- /main-area -->
+</div><!-- /app-layout -->
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title" id="confirmTitle">Confirm</div>
+    <div class="modal-body" id="confirmBody">Are you sure?</div>
+    <div class="modal-btns">
+      <button class="btn-secondary" id="confirmCancel" style="padding:8px 18px;font-size:13px;">Cancel</button>
+      <button class="btn-primary" id="confirmOk" style="padding:8px 18px;font-size:13px;">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- BT Device Picker Modal -->
+<div class="modal-overlay" id="btPickerModal">
+  <div class="modal-box">
+    <div class="modal-title">Bluetooth Devices</div>
+    <div class="bt-device-list" id="btDeviceList">
+      <div class="no-devices-msg">Scanning...</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-secondary" id="btPickerCancel" style="padding:8px 18px;font-size:13px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // ============================================================
+  // CONSTANTS & CHANNEL DEFINITIONS
+  // ============================================================
+  var CHANNEL_NAMES = [
+    'Batterie 1', 'Batterie 2', 'Batterie 3',
+    'Propulseur', 'Guindeau', 'Ventilateur',
+    'Altern.140A', 'Altern.80A'
+  ];
+
+  var CHANNEL_KEYS_C = ['C0','C1','C2','C3','C4','C5','C6','C7'];
+  var CHANNEL_KEYS_V = ['V0','V1','V2','V3','V4','V5','V6','V7'];
+  var ENGINE_KEYS    = ['P','T','NC','NR','CPL','RPM'];
+  var ENGINE_LABELS  = ['Oil Pressure', 'Coolant Temp', 'Fuel Level', 'Coolant Level', 'Engine Torque', 'Engine RPM'];
+  var ENGINE_UNITS   = ['PSI', '°C', '%', '%', 'Nm', 'RPM'];
+  var GPS_KEYS       = ['LAT','LON','SPD','HDG'];
+  var GPS_LABELS     = ['Latitude', 'Longitude', 'Speed', 'Heading'];
+  var GPS_UNITS      = ['°', '°', 'knots', '°'];
+
+  var CHART_COLORS = [
+    '#00D4FF','#FF4D6A','#FFB300','#00E676','#AB47BC',
+    '#FF7043','#26C6DA','#EC407A','#66BB6A','#FFA726',
+    '#7E57C2','#42A5F5','#EF5350','#FFEE58','#8D6E63',
+    '#78909C','#5C6BC0','#29B6F6','#9CCC65','#F06292',
+    '#4DB6AC','#FF8A65'
+  ];
+
+  var MAX_HISTORY = 300;
+  var MAX_FRAME_LOG = 200;
+  var MAX_ALARM_HISTORY = 100;
+
+  // Default thresholds (Arduino defaults)
+  var DEFAULT_THRESHOLDS = {
+    SEUIL_TEMP_MAX: 95.0,
+    SEUIL_PRESSION_MIN: 1.5,
+    SEUIL_PRESSION_MAX: 5.0,
+    SEUIL_NIVEAU_MIN: 10.0
+  };
+
+  var ALARM_LABELS = {
+    P_LOW: 'Low Oil Pressure',
+    P_HIGH: 'High Oil Pressure',
+    T_HIGH: 'High Coolant Temp',
+    NC_LOW: 'Low Fuel Level',
+    NR_LOW: 'Low Coolant Level'
+  };
+
+  var ALARM_DESCRIPTIONS = {
+    P_LOW: 'Oil pressure is below minimum threshold',
+    P_HIGH: 'Oil pressure exceeds maximum threshold',
+    T_HIGH: 'Coolant temperature exceeds maximum threshold',
+    NC_LOW: 'Fuel level is below minimum threshold',
+    NR_LOW: 'Coolant level is below minimum threshold'
+  };
+
+  // ============================================================
+  // APPLICATION STATE
+  // ============================================================
+  var state = {
+    connected: false,
+    btDeviceName: '',
+    btDeviceAddr: '',
+    autoReconnect: true,
+    connecting: false,
+    reconnecting: false,
+    reconnectAttempt: '',
+
+    // Latest data from Arduino
+    data: {
+      C0:0,C1:0,C2:0,C3:0,C4:0,C5:0,C6:0,C7:0,
+      V0:0,V1:0,V2:0,V3:0,V4:0,V5:0,V6:0,V7:0,
+      P:0, T:0, NC:0, NR:0, CPL:0, RPM:0,
+      LAT:'NA', LON:'NA', SPD:0, HDG:0
+    },
+
+    // History buffer for charts
+    history: [],
+    // history entries: { t: timestamp, data: {...} }
+
+    // Frame counters
+    framesRx: 0,
+    framesErr: 0,
+
+    // Alarms
+    activeAlarms: {},    // code -> { code, timestamp, acked }
+    alarmHistory: [],    // [{ code, timestamp, clearedAt }]
+
+    // Applied config
+    appliedConfig: {
+      SEUIL_TEMP_MAX: 95.0,
+      SEUIL_PRESSION_MIN: 1.5,
+      SEUIL_NIVEAU_MIN: 10.0
+    },
+
+    // Frame log
+    frameLog: [],
+
+    // Connection log
+    connLog: [],
+
+    // Timing
+    connectTime: null,
+    lastFrameTime: null,
+
+    // Rate calculation
+    rateWindow: [],  // timestamps of frames in last 60s
+
+    // Charts
+    chartRange: 30,  // seconds
+    selectedChannels: ['C0','V0','P','T','RPM'],
+
+    // Current tab
+    activeTab: 'dashboard'
+  };
+
+  // ============================================================
+  // DOM REFERENCES
+  // ============================================================
+  var $ = function(sel) { return document.querySelector(sel); };
+  var $$ = function(sel) { return document.querySelectorAll(sel); };
+
+  // ============================================================
+  // UTILITY FUNCTIONS
+  // ============================================================
+  function now() { return Date.now(); }
+
+  function formatTime(d) {
+    var h = d.getHours().toString().padStart(2,'0');
+    var m = d.getMinutes().toString().padStart(2,'0');
+    var s = d.getSeconds().toString().padStart(2,'0');
+    return h + ':' + m + ':' + s;
+  }
+
+  function formatDateTime(d) {
+    var mo = (d.getMonth()+1).toString().padStart(2,'0');
+    var da = d.getDate().toString().padStart(2,'0');
+    return mo + '/' + da + ' ' + formatTime(d);
+  }
+
+  function formatUptime(ms) {
+    if (!ms || ms < 0) return '0:00';
+    var totalSec = Math.floor(ms / 1000);
+    var h = Math.floor(totalSec / 3600);
+    var m = Math.floor((totalSec % 3600) / 60);
+    var s = totalSec % 60;
+    if (h > 0) return h + ':' + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+    return m + ':' + s.toString().padStart(2,'0');
+  }
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  function safeFloat(v, def) {
+    if (v === undefined || v === null || v === '' || v === 'NA') return def;
+    var n = parseFloat(v);
+    return isNaN(n) ? def : n;
+  }
+
+  function safeInt(v, def) {
+    if (v === undefined || v === null || v === '' || v === 'NA') return def;
+    var n = parseInt(v, 10);
+    return isNaN(n) ? def : n;
+  }
+
+  // ============================================================
+  // CHECKSUM (Arduino algorithm)
+  // ============================================================
+  function computeChecksum(frame) {
+    var cs = 0;
+    for (var i = 1; i < frame.length; i++) {
+      if (frame[i] === '*') break;
+      cs ^= frame.charCodeAt(i);
+    }
+    return cs;
+  }
+
+  function verifyChecksum(frame) {
+    var starIdx = frame.lastIndexOf('*');
+    if (starIdx < 0) return false;
+    var expectedStr = frame.substring(starIdx + 1);
+    var expected = parseInt(expectedStr, 16);
+    if (isNaN(expected)) return false;
+    var computed = computeChecksum(frame);
+    return computed === expected;
+  }
+
+  // ============================================================
+  // FRAME PARSER
+  // ============================================================
+  var rxBuffer = '';
+
+  function processIncoming(raw) {
+    // Decode base64 if we have the helper
+    var decoded;
+    if (window.__b64) {
+      try { decoded = window.__b64(raw); } catch(e) { decoded = raw; }
+    } else {
+      try { decoded = atob(raw); } catch(e) { decoded = raw; }
+    }
+    rxBuffer += decoded;
+
+    // Extract complete frames (terminated by \r\n or \n)
+    var lines = rxBuffer.split(/\r?\n/);
+    // Keep the last (possibly incomplete) part in the buffer
+    rxBuffer = lines.pop() || '';
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (line.length > 0) {
+        parseFrame(line);
+      }
+    }
+
+    // Prevent buffer from growing too large (truncated data)
+    if (rxBuffer.length > 2048) {
+      rxBuffer = rxBuffer.substring(rxBuffer.length - 512);
+    }
+  }
+
+  function parseFrame(frame) {
+    if (!frame || frame.length < 2) return;
+
+    addFrameLog('RX', frame);
+
+    // Check for $ prefix
+    if (frame.charAt(0) !== '$') {
+      state.framesErr++;
+      updateCounters();
+      return;
+    }
+
+    // Route by type
+    if (frame.startsWith('$DATA')) {
+      parseDataFrame(frame);
+    } else if (frame.startsWith('$ALARM')) {
+      parseAlarmFrame(frame);
+    } else if (frame.startsWith('$ACK')) {
+      parseAckFrame(frame);
+    } else if (frame.startsWith('$CONF')) {
+      parseConfFrame(frame);
+    } else if (frame.startsWith('$PONG')) {
+      parsePongFrame(frame);
+    } else {
+      state.framesErr++;
+      updateCounters();
+    }
+  }
+
+  function parseDataFrame(frame) {
+    // Verify checksum
+    if (!verifyChecksum(frame)) {
+      state.framesErr++;
+      updateCounters();
+      return;
+    }
+
+    // Strip checksum part after *
+    var starIdx = frame.lastIndexOf('*');
+    var dataPart = starIdx > 0 ? frame.substring(0, starIdx) : frame;
+
+    var parts = dataPart.split(',');
+    // Expected: $DATA,C0,C1,C2,C3,C4,C5,C6,C7,V0,V1,V2,V3,V4,V5,V6,V7,P,T,NC,NR,CPL,RPM,LAT,LON,SPD,HDG
+    // parts[0] = "$DATA", then 28 values
+    if (parts.length < 29) {
+      // Partial frame — try to fill what we can
+      state.framesErr++;
+      updateCounters();
+      // Still try to parse what we have
+      if (parts.length > 1) {
+        fillPartialData(parts);
+      }
+      return;
+    }
+
+    state.framesRx++;
+    state.lastFrameTime = now();
+
+    // Track rate
+    state.rateWindow.push(now());
+    // Trim window to last 60s
+    var cutoff = now() - 60000;
+    while (state.rateWindow.length > 0 && state.rateWindow[0] < cutoff) {
+      state.rateWindow.shift();
+    }
+
+    var d = state.data;
+    for (var i = 0; i < 8; i++) {
+      d[CHANNEL_KEYS_C[i]] = safeFloat(parts[1 + i], 0);
+    }
+    for (var i = 0; i < 8; i++) {
+      d[CHANNEL_KEYS_V[i]] = safeFloat(parts[9 + i], 0);
+    }
+    d.P   = safeFloat(parts[17], 0);
+    d.T   = safeFloat(parts[18], 0);
+    d.NC  = safeFloat(parts[19], 0);
+    d.NR  = safeFloat(parts[20], 0);
+    d.CPL = safeFloat(parts[21], 0);
+    d.RPM = safeFloat(parts[22], 0);
+    d.LAT = parts[23] || 'NA';
+    d.LON = parts[24] || 'NA';
+    d.SPD = safeFloat(parts[25], 0);
+    d.HDG = safeFloat(parts[26], 0);
+
+    // Add to history
+    var histEntry = { t: now(), data: {} };
+    for (var key in d) {
+      histEntry.data[key] = d[key];
+    }
+    state.history.push(histEntry);
+    if (state.history.length > MAX_HISTORY) {
+      state.history.shift();
+    }
+
+    updateCounters();
+    updateDashboard();
+  }
+
+  function fillPartialData(parts) {
+    // Best-effort: fill what we can from a truncated $DATA frame
+    var d = state.data;
+    var numValues = parts.length - 1;
+    for (var i = 0; i < Math.min(numValues, 8); i++) {
+      d[CHANNEL_KEYS_C[i]] = safeFloat(parts[1 + i], d[CHANNEL_KEYS_C[i]]);
+    }
+    if (numValues > 8) {
+      for (var i = 0; i < Math.min(numValues - 8, 8); i++) {
+        d[CHANNEL_KEYS_V[i]] = safeFloat(parts[9 + i], d[CHANNEL_KEYS_V[i]]);
+      }
+    }
+    updateDashboard();
+  }
+
+  function parseAlarmFrame(frame) {
+    // $ALARM,CODE*CS
+    var starIdx = frame.lastIndexOf('*');
+    var dataPart = starIdx > 0 ? frame.substring(0, starIdx) : frame;
+    var parts = dataPart.split(',');
+    if (parts.length < 2) return;
+
+    var code = parts[1].trim();
+    if (!ALARM_LABELS[code]) return;
+
+    // Verify checksum if present
+    if (starIdx > 0 && !verifyChecksum(frame)) {
+      // Still process the alarm even with bad checksum — safety first
+    }
+
+    state.framesRx++;
+    updateCounters();
+
+    // Add to active alarms if not already there
+    if (!state.activeAlarms[code]) {
+      state.activeAlarms[code] = {
+        code: code,
+        timestamp: now(),
+        acked: false
+      };
+    }
+
+    updateAlarms();
+    updateAlarmBadge();
+  }
+
+  function parseAckFrame(frame) {
+    // $ACK,COMMAND,OK
+    var parts = frame.split(',');
+    state.framesRx++;
+    updateCounters();
+    addFrameLog('SYS', 'ACK: ' + (parts[1] || '?') + ' -> ' + (parts[2] || '?'));
+  }
+
+  function parseConfFrame(frame) {
+    // $CONF,TEMP_MAX=x,P_MIN=x,CARBU_MIN=x
+    var starIdx = frame.lastIndexOf('*');
+    var dataPart = starIdx > 0 ? frame.substring(0, starIdx) : frame;
+    var parts = dataPart.split(',');
+
+    state.framesRx++;
+    updateCounters();
+
+    for (var i = 1; i < parts.length; i++) {
+      var kv = parts[i].split('=');
+      if (kv.length === 2) {
+        var key = kv[0].trim();
+        var val = safeFloat(kv[1], 0);
+        if (key === 'TEMP_MAX') {
+          state.appliedConfig.SEUIL_TEMP_MAX = val;
+        } else if (key === 'P_MIN') {
+          state.appliedConfig.SEUIL_PRESSION_MIN = val;
+        } else if (key === 'CARBU_MIN') {
+          state.appliedConfig.SEUIL_NIVEAU_MIN = val;
+        }
+      }
+    }
+    updateConfigApplied();
+  }
+
+  function parsePongFrame(frame) {
+    state.framesRx++;
+    updateCounters();
+    addFrameLog('SYS', 'PONG received');
+  }
+
+  // ============================================================
+  // SENDING COMMANDS
+  // ============================================================
+  function sendCommand(cmd) {
+    if (window.AndroidBT && state.connected) {
+      try {
+        window.AndroidBT.send(cmd);
+        addFrameLog('TX', cmd.replace(/\r?\n/g, ''));
+      } catch(e) {
+        addFrameLog('SYS', 'Send error: ' + e.message);
+      }
+    } else {
+      addFrameLog('SYS', 'Cannot send (not connected)');
+    }
+  }
+
+  function sendPing() {
+    sendCommand('$PING\r\n');
+  }
+
+  function sendSetTemp(val) {
+    sendCommand('$SET_SEUIL_TEMP,' + val + '\r\n');
+  }
+
+  function sendSetPress(val) {
+    sendCommand('$SET_SEUIL_PRESSION,' + val + '\r\n');
+  }
+
+  function sendSetCarbu(val) {
+    sendCommand('$SET_SEUIL_CARBU,' + val + '\r\n');
+  }
+
+  function sendGetConf() {
+    sendCommand('$GET_CONF\r\n');
+  }
+
+  function sendResetAlarm() {
+    sendCommand('$RESET_ALARME\r\n');
+  }
+
+  // ============================================================
+  // BLUETOOTH INTERFACE
+  // ============================================================
+  function btIsAvailable() {
+    return typeof window.AndroidBT !== 'undefined';
+  }
+
+  function btConnect(address) {
+    if (!btIsAvailable()) return;
+    try {
+      state.connecting = true;
+      updateBtUI();
+      window.AndroidBT.connect(address);
+    } catch(e) {
+      state.connecting = false;
+      addConnLog('Connect error: ' + e.message);
+      updateBtUI();
+    }
+  }
+
+  function btDisconnect() {
+    if (!btIsAvailable()) return;
+    try {
+      window.AndroidBT.disconnect();
+    } catch(e) {
+      addConnLog('Disconnect error: ' + e.message);
+    }
+  }
+
+  function btGetPairedDevices() {
+    if (!btIsAvailable()) return [];
+    try {
+      var json = window.AndroidBT.getPairedDevices();
+      return JSON.parse(json);
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function btSetAutoReconnect(val) {
+    if (!btIsAvailable()) return;
+    try {
+      window.AndroidBT.setAutoReconnect(val);
+    } catch(e) {}
+  }
+
+  // ============================================================
+  // ANDROID CALLBACKS (exposed on window)
+  // ============================================================
+  window.onAndroidBTConnected = function(deviceName) {
+    state.connected = true;
+    state.connecting = false;
+    state.reconnecting = false;
+    state.btDeviceName = deviceName || 'Unknown';
+    state.connectTime = now();
+    rxBuffer = '';
+    addConnLog('Connected to ' + deviceName);
+    updateBtUI();
+  };
+
+  window.onAndroidBTDisconnected = function(reason) {
+    state.connected = false;
+    state.connecting = false;
+    state.btDeviceName = '';
+    addConnLog('Disconnected: ' + (reason || 'unknown'));
+    updateBtUI();
+  };
+
+  window.onAndroidBTDataB64 = function(base64String) {
+    try {
+      processIncoming(base64String);
+    } catch(e) {
+      state.framesErr++;
+      updateCounters();
+    }
+  };
+
+  window.onAndroidBTReconnecting = function(attemptInfo) {
+    state.reconnecting = true;
+    state.reconnectAttempt = attemptInfo || '';
+    addConnLog('Reconnecting: ' + attemptInfo);
+    updateBtUI();
+  };
+
+  window.onAndroidBTWatchdog = function(message) {
+    addConnLog('Watchdog: ' + (message || 'No data timeout'));
+    addFrameLog('SYS', 'Watchdog: ' + (message || 'No data timeout'));
+  };
+
+  window.onAndroidBTSent = function(data) {
+    // Confirmation that data was sent — already logged in sendCommand
+  };
+
+  // ============================================================
+  // LOGGING
+  // ============================================================
+  function addFrameLog(type, text) {
+    var entry = {
+      type: type,
+      text: text,
+      time: formatTime(new Date())
+    };
+    state.frameLog.push(entry);
+    if (state.frameLog.length > MAX_FRAME_LOG) {
+      state.frameLog.shift();
+    }
+    renderFrameLog();
+  }
+
+  function addConnLog(text) {
+    var entry = {
+      text: text,
+      time: formatTime(new Date())
+    };
+    state.connLog.push(entry);
+    if (state.connLog.length > MAX_FRAME_LOG) {
+      state.connLog.shift();
+    }
+    renderConnLog();
+  }
+
+  // ============================================================
+  // UI BUILDING — Dashboard cards
+  // ============================================================
+  function buildCurrentCards() {
+    var container = $('#currentCards');
+    var html = '';
+    for (var i = 0; i < 8; i++) {
+      html += '<div class="gauge-card" id="card-C' + i + '">' +
+        '<div class="gauge-card-label">' + CHANNEL_NAMES[i] + '</div>' +
+        '<div class="gauge-card-value" id="val-C' + i + '">0.0</div>' +
+        '<div class="gauge-card-unit">A</div>' +
+        '<div class="gauge-bar"><div class="gauge-bar-fill" id="bar-C' + i + '" style="width:0%"></div></div>' +
+        '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  function buildVoltageCards() {
+    var container = $('#voltageCards');
+    var html = '';
+    for (var i = 0; i < 8; i++) {
+      html += '<div class="gauge-card" id="card-V' + i + '">' +
+        '<div class="gauge-card-label">' + CHANNEL_NAMES[i] + '</div>' +
+        '<div class="gauge-card-value" id="val-V' + i + '">0.0</div>' +
+        '<div class="gauge-card-unit">V</div>' +
+        '<div class="gauge-bar"><div class="gauge-bar-fill" id="bar-V' + i + '" style="width:0%"></div></div>' +
+        '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  function buildEngineCards() {
+    var container = $('#engineCards');
+    var html = '';
+    for (var i = 0; i < 6; i++) {
+      html += '<div class="gauge-card" id="card-E' + ENGINE_KEYS[i] + '">' +
+        '<div class="gauge-card-label">' + ENGINE_LABELS[i] + '</div>' +
+        '<div class="gauge-card-value" id="val-E' + ENGINE_KEYS[i] + '">0</div>' +
+        '<div class="gauge-card-unit">' + ENGINE_UNITS[i] + '</div>' +
+        '<div class="gauge-bar"><div class="gauge-bar-fill" id="bar-E' + ENGINE_KEYS[i] + '" style="width:0%"></div></div>' +
+        '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  function buildGpsCards() {
+    var container = $('#gpsCards');
+    var html = '' +
+      '<div class="gps-card" id="card-GPS-fix">' +
+        '<div class="gps-card-label">GPS Fix</div>' +
+        '<div id="gpsFixBadge"><span class="gps-fix-badge no-fix"><span class="gps-fix-dot"></span>NO FIX</span></div>' +
+      '</div>';
+    for (var i = 0; i < 4; i++) {
+      html += '<div class="gps-card" id="card-G' + GPS_KEYS[i] + '">' +
+        '<div class="gps-card-label">' + GPS_LABELS[i] + '</div>' +
+        '<div class="gps-card-value" id="val-G' + GPS_KEYS[i] + '">' + (GPS_KEYS[i] === 'LAT' || GPS_KEYS[i] === 'LON' ? 'NA' : '0') + '</div>' +
+        '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  // ============================================================
+  // UI BUILDING — Channel selector for charts
+  // ============================================================
+  function buildChannelSelector() {
+    var container = $('#channelSelector');
+    var allKeys = CHANNEL_KEYS_C.concat(CHANNEL_KEYS_V).concat(ENGINE_KEYS).concat(GPS_KEYS);
+    var html = '';
+    for (var i = 0; i < allKeys.length; i++) {
+      var key = allKeys[i];
+      var checked = state.selectedChannels.indexOf(key) >= 0 ? 'checked' : '';
+      var label = key;
+      // Add friendly name
+      var ci = CHANNEL_KEYS_C.indexOf(key);
+      if (ci >= 0) label = key + ' - ' + CHANNEL_NAMES[ci] + ' (A)';
+      var vi = CHANNEL_KEYS_V.indexOf(key);
+      if (vi >= 0) label = key + ' - ' + CHANNEL_NAMES[vi] + ' (V)';
+      var ei = ENGINE_KEYS.indexOf(key);
+      if (ei >= 0) label = key + ' - ' + ENGINE_LABELS[ei];
+      var gi = GPS_KEYS.indexOf(key);
+      if (gi >= 0) label = key + ' - ' + GPS_LABELS[gi];
+
+      html += '<label class="channel-checkbox">' +
+        '<input type="checkbox" data-channel="' + key + '" ' + checked + '>' +
+        '<span>' + label + '</span>' +
+        '</label>';
+    }
+    container.innerHTML = html;
+
+    // Attach events
+    var checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        var ch = this.getAttribute('data-channel');
+        if (this.checked) {
+          if (state.selectedChannels.indexOf(ch) < 0) {
+            state.selectedChannels.push(ch);
+          }
+        } else {
+          var idx = state.selectedChannels.indexOf(ch);
+          if (idx >= 0) state.selectedChannels.splice(idx, 1);
+        }
+        renderChart();
+      });
+    });
+  }
+
+  // ============================================================
+  // UI UPDATES
+  // ============================================================
+  function updateDashboard() {
+    var d = state.data;
+
+    // Current cards
+    for (var i = 0; i < 8; i++) {
+      var key = CHANNEL_KEYS_C[i];
+      var val = d[key];
+      var el = $('#val-' + key);
+      var bar = $('#bar-' + key);
+      var card = $('#card-' + key);
+      if (!el) continue;
+
+      el.textContent = val.toFixed(1);
+
+      // Color warnings: >60A red, negative amber
+      card.className = 'gauge-card';
+      el.className = 'gauge-card-value';
+      bar.className = 'gauge-bar-fill';
+
+      if (val > 60) {
+        card.classList.add('danger');
+        el.classList.add('danger-val');
+        bar.classList.add('danger-fill');
+      } else if (val < 0) {
+        card.classList.add('warning');
+        el.classList.add('warn-val');
+        bar.classList.add('warn-fill');
+      }
+
+      // Bar: 0-100A range
+      var pct = clamp(Math.abs(val) / 100 * 100, 0, 100);
+      bar.style.width = pct + '%';
+    }
+
+    // Voltage cards
+    for (var i = 0; i < 8; i++) {
+      var key = CHANNEL_KEYS_V[i];
+      var val = d[key];
+      var el = $('#val-' + key);
+      var bar = $('#bar-' + key);
+      var card = $('#card-' + key);
+      if (!el) continue;
+
+      el.textContent = val.toFixed(1);
+
+      card.className = 'gauge-card';
+      el.className = 'gauge-card-value';
+      bar.className = 'gauge-bar-fill';
+
+      if (val > 15) {
+        card.classList.add('danger');
+        el.classList.add('danger-val');
+        bar.classList.add('danger-fill');
+      } else if (val < 11.5 && val > 0) {
+        card.classList.add('warning');
+        el.classList.add('warn-val');
+        bar.classList.add('warn-fill');
+      }
+
+      // Bar: 0-18V range
+      var pct = clamp(val / 18 * 100, 0, 100);
+      bar.style.width = pct + '%';
+    }
+
+    // Engine cards
+    var engineMaxes = { P: 10, T: 150, NC: 100, NR: 100, CPL: 500, RPM: 4000 };
+    for (var i = 0; i < 6; i++) {
+      var key = ENGINE_KEYS[i];
+      var val = d[key];
+      var el = $('#val-E' + key);
+      var bar = $('#bar-E' + key);
+      var card = $('#card-E' + key);
+      if (!el) continue;
+
+      if (key === 'RPM') {
+        el.textContent = Math.round(val).toString();
+      } else if (key === 'CPL') {
+        el.textContent = val.toFixed(0);
+      } else {
+        el.textContent = val.toFixed(1);
+      }
+
+      card.className = 'gauge-card';
+      el.className = 'gauge-card-value';
+      bar.className = 'gauge-bar-fill';
+
+      // Special coloring based on alarm thresholds
+      if (key === 'P') {
+        if (val > 0 && val < state.appliedConfig.SEUIL_PRESSION_MIN) {
+          card.classList.add('danger');
+          el.classList.add('danger-val');
+          bar.classList.add('danger-fill');
+        } else if (val > DEFAULT_THRESHOLDS.SEUIL_PRESSION_MAX) {
+          card.classList.add('danger');
+          el.classList.add('danger-val');
+          bar.classList.add('danger-fill');
+        }
+      } else if (key === 'T') {
+        if (val > state.appliedConfig.SEUIL_TEMP_MAX) {
+          card.classList.add('danger');
+          el.classList.add('danger-val');
+          bar.classList.add('danger-fill');
+        }
+      } else if (key === 'NC') {
+        if (val < state.appliedConfig.SEUIL_NIVEAU_MIN) {
+          card.classList.add('warning');
+          el.classList.add('warn-val');
+          bar.classList.add('warn-fill');
+        }
+      } else if (key === 'NR') {
+        if (val < DEFAULT_THRESHOLDS.SEUIL_NIVEAU_MIN) {
+          card.classList.add('warning');
+          el.classList.add('warn-val');
+          bar.classList.add('warn-fill');
+        }
+      }
+
+      var maxVal = engineMaxes[key] || 100;
+      var pct = clamp(val / maxVal * 100, 0, 100);
+      bar.style.width = pct + '%';
+    }
+
+    // GPS cards
+    var hasFix = d.LAT !== 'NA' && d.LON !== 'NA' && d.LAT !== 0 && d.LON !== 0;
+    var fixBadge = $('#gpsFixBadge');
+    if (fixBadge) {
+      fixBadge.innerHTML = hasFix ?
+        '<span class="gps-fix-badge has-fix"><span class="gps-fix-dot"></span>FIX OK</span>' :
+        '<span class="gps-fix-badge no-fix"><span class="gps-fix-dot"></span>NO FIX</span>';
+    }
+    var latEl = $('#val-GLAT');
+    var lonEl = $('#val-GLON');
+    var spdEl = $('#val-GSPD');
+    var hdgEl = $('#val-GHDG');
+    if (latEl) {
+      latEl.textContent = d.LAT === 'NA' ? 'NA' : safeFloat(d.LAT, 0).toFixed(5);
+      latEl.className = 'gps-card-value' + (hasFix ? '' : ' no-fix');
+    }
+    if (lonEl) {
+      lonEl.textContent = d.LON === 'NA' ? 'NA' : safeFloat(d.LON, 0).toFixed(5);
+      lonEl.className = 'gps-card-value' + (hasFix ? '' : ' no-fix');
+    }
+    if (spdEl) {
+      spdEl.textContent = safeFloat(d.SPD, 0).toFixed(1);
+    }
+    if (hdgEl) {
+      hdgEl.textContent = safeFloat(d.HDG, 0).toFixed(1);
+    }
+  }
+
+  function updateCounters() {
+    $('#frameRx').textContent = 'RX: ' + state.framesRx;
+    $('#frameErr').textContent = 'ERR: ' + state.framesErr;
+    $('#statRx').textContent = state.framesRx;
+    $('#statErr').textContent = state.framesErr;
+
+    // Data rate (frames per minute)
+    var rate = state.rateWindow.length;
+    $('#statRate').innerHTML = rate + ' <small style="font-size:10px;">f/m</small>';
+
+    // Error rate
+    var total = state.framesRx + state.framesErr;
+    var errRate = total > 0 ? (state.framesErr / total * 100).toFixed(1) : '0';
+    $('#statErrorRate').textContent = errRate + '%';
+
+    // Uptime
+    if (state.connectTime) {
+      $('#statUptime').textContent = formatUptime(now() - state.connectTime);
+    }
+
+    // Last frame time
+    if (state.lastFrameTime) {
+      $('#statLastFrame').textContent = formatTime(new Date(state.lastFrameTime));
+    }
+  }
+
+  function updateBtUI() {
+    var indicator = $('#btIndicator');
+    var label = $('#btLabel');
+    var btn = $('#btBtn');
+    var btnText = $('#btBtnText');
+    var connText = $('#headerConnText');
+
+    indicator.className = 'bt-indicator';
+    btn.className = 'header-bt-btn';
+
+    if (state.connected) {
+      indicator.classList.add('connected');
+      label.textContent = 'BT OK';
+      btn.classList.add('connected');
+      btnText.textContent = 'Disconnect';
+      connText.textContent = state.btDeviceName;
+    } else if (state.reconnecting) {
+      indicator.classList.add('reconnecting');
+      label.textContent = 'RECON';
+      btnText.textContent = 'Reconnecting...';
+      connText.textContent = 'Reconnecting...';
+    } else if (state.connecting) {
+      indicator.classList.add('reconnecting');
+      label.textContent = 'CONN';
+      btnText.textContent = 'Connecting...';
+      connText.textContent = 'Connecting...';
+    } else {
+      label.textContent = 'No BT';
+      btnText.textContent = 'Connect';
+      connText.textContent = 'Disconnected';
+    }
+  }
+
+  // ============================================================
+  // ALARMS
+  // ============================================================
+  function updateAlarms() {
+    // Active alarms
+    var container = $('#activeAlarmsList');
+    var codes = Object.keys(state.activeAlarms);
+    if (codes.length === 0) {
+      container.innerHTML = '<div class="no-alarms-msg">No active alarms</div>';
+    } else {
+      var html = '';
+      for (var i = 0; i < codes.length; i++) {
+        var alarm = state.activeAlarms[codes[i]];
+        html += '<div class="alarm-entry alarm-entry-' + alarm.code + '">' +
+          '<span class="alarm-entry-badge alarm-type-' + alarm.code + '">' + alarm.code + '</span>' +
+          '<div class="alarm-entry-info">' +
+            '<div class="alarm-entry-type">' + ALARM_LABELS[alarm.code] + '</div>' +
+            '<div class="alarm-entry-time">' + formatDateTime(new Date(alarm.timestamp)) +
+              (alarm.acked ? ' &mdash; ACKED' : '') + '</div>' +
+          '</div>' +
+          '<div class="alarm-entry-actions">' +
+            (!alarm.acked ? '<button class="btn-sm ack" data-ack="' + alarm.code + '">ACK</button>' : '') +
+            '<button class="btn-sm clear" data-clear="' + alarm.code + '">CLEAR</button>' +
+          '</div>' +
+          '</div>';
+      }
+      container.innerHTML = html;
+
+      // Bind buttons
+      container.querySelectorAll('[data-ack]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var code = this.getAttribute('data-ack');
+          if (state.activeAlarms[code]) {
+            state.activeAlarms[code].acked = true;
+            updateAlarms();
+          }
+        });
+      });
+      container.querySelectorAll('[data-clear]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var code = this.getAttribute('data-clear');
+          clearAlarm(code);
+        });
+      });
+    }
+
+    // Alarm history
+    var histContainer = $('#alarmHistoryList');
+    if (state.alarmHistory.length === 0) {
+      histContainer.innerHTML = '<div class="no-alarms-msg">No alarm history</div>';
+    } else {
+      var html = '';
+      // Show most recent first
+      for (var i = state.alarmHistory.length - 1; i >= 0; i--) {
+        var h = state.alarmHistory[i];
+        html += '<div class="alarm-entry alarm-entry-' + h.code + '">' +
+          '<span class="alarm-entry-badge alarm-type-' + h.code + '">' + h.code + '</span>' +
+          '<div class="alarm-entry-info">' +
+            '<div class="alarm-entry-type">' + ALARM_LABELS[h.code] + '</div>' +
+            '<div class="alarm-entry-time">Raised: ' + formatDateTime(new Date(h.timestamp)) +
+              ' &mdash; Cleared: ' + formatDateTime(new Date(h.clearedAt)) + '</div>' +
+          '</div>' +
+          '</div>';
+      }
+      histContainer.innerHTML = html;
+    }
+
+    // Alarm banner
+    var banner = $('#alarmBanner');
+    var bannerCount = $('#alarmBannerCount');
+    var bannerText = $('#alarmBannerText');
+    var activeCount = Object.keys(state.activeAlarms).length;
+    if (activeCount > 0) {
+      banner.classList.add('visible');
+      bannerCount.textContent = activeCount;
+      var alarmNames = Object.keys(state.activeAlarms).map(function(c) { return ALARM_LABELS[c]; }).join(', ');
+      bannerText.textContent = 'ACTIVE ALARMS: ' + alarmNames;
+    } else {
+      banner.classList.remove('visible');
+    }
+  }
+
+  function clearAlarm(code) {
+    if (state.activeAlarms[code]) {
+      state.alarmHistory.push({
+        code: code,
+        timestamp: state.activeAlarms[code].timestamp,
+        clearedAt: now()
+      });
+      if (state.alarmHistory.length > MAX_ALARM_HISTORY) {
+        state.alarmHistory.shift();
+      }
+      delete state.activeAlarms[code];
+      updateAlarms();
+      updateAlarmBadge();
+    }
+  }
+
+  function updateAlarmBadge() {
+    var badge = $('#alarmBadge');
+    var count = Object.keys(state.activeAlarms).length;
+    if (count > 0) {
+      badge.style.display = 'flex';
+      badge.textContent = count;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // ============================================================
+  // FRAME LOG RENDERING
+  // ============================================================
+  var frameLogRenderPending = false;
+
+  function renderFrameLog() {
+    if (frameLogRenderPending) return;
+    frameLogRenderPending = true;
+    requestAnimationFrame(function() {
+      frameLogRenderPending = false;
+      var container = $('#frameLog');
+      if (!container) return;
+      // Only render the last 80 entries for performance
+      var entries = state.frameLog;
+      var start = Math.max(0, entries.length - 80);
+      var html = '';
+      for (var i = start; i < entries.length; i++) {
+        var e = entries[i];
+        var badgeClass = 'rx';
+        if (e.type === 'TX') badgeClass = 'tx';
+        else if (e.type === 'alarm') badgeClass = 'alarm';
+        else if (e.type === 'SYS') badgeClass = 'sys';
+        html += '<div class="frame-log-entry">' +
+          '<span class="frame-log-time" style="color:var(--text-dim);white-space:nowrap;">' + e.time + '</span> ' +
+          '<span class="frame-log-badge ' + badgeClass + '">' + e.type + '</span> ' +
+          '<span class="frame-log-text">' + escapeHtml(e.text) + '</span>' +
+          '</div>';
+      }
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+    });
+  }
+
+  var connLogRenderPending = false;
+
+  function renderConnLog() {
+    if (connLogRenderPending) return;
+    connLogRenderPending = true;
+    requestAnimationFrame(function() {
+      connLogRenderPending = false;
+      var container = $('#connLog');
+      if (!container) return;
+      var entries = state.connLog;
+      var start = Math.max(0, entries.length - 50);
+      var html = '';
+      for (var i = start; i < entries.length; i++) {
+        var e = entries[i];
+        html += '<div class="conn-log-entry">' +
+          '<span class="conn-log-time">' + e.time + '</span> ' +
+          '<span>' + escapeHtml(e.text) + '</span>' +
+          '</div>';
+      }
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+    });
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ============================================================
+  // CHART RENDERING
+  // ============================================================
+  var chartRenderPending = false;
+
+  function renderChart() {
+    if (chartRenderPending) return;
+    chartRenderPending = true;
+    requestAnimationFrame(function() {
+      chartRenderPending = false;
+      doRenderChart();
+    });
+  }
+
+  function doRenderChart() {
+    var canvas = $('#chartCanvas');
+    if (!canvas) return;
+
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.getBoundingClientRect();
+    var w = rect.width;
+    var h = rect.height;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    // Clear
+    ctx.fillStyle = '#1A3050';
+    ctx.fillRect(0, 0, w, h);
+
+    var rangeMs = state.chartRange * 1000;
+    var nowMs = now();
+    var startMs = nowMs - rangeMs;
+
+    // Filter history to time range
+    var historySlice = [];
+    for (var i = 0; i < state.history.length; i++) {
+      if (state.history[i].t >= startMs) {
+        historySlice.push(state.history[i]);
+      }
+    }
+
+    if (historySlice.length < 2 || state.selectedChannels.length === 0) {
+      // Draw "no data" message
+      ctx.fillStyle = '#A8B2C1';
+      ctx.font = '14px "Exo 2", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('No data in selected time range', w / 2, h / 2);
+      // Draw grid
+      drawChartGrid(ctx, w, h, startMs, nowMs);
+      updateChartLegend();
+      return;
+    }
+
+    // Calculate padding
+    var padLeft = 60;
+    var padRight = 16;
+    var padTop = 16;
+    var padBottom = 30;
+    var chartW = w - padLeft - padRight;
+    var chartH = h - padTop - padBottom;
+
+    // Draw grid
+    drawChartGrid(ctx, w, h, startMs, nowMs);
+
+    // Draw each channel
+    var channels = state.selectedChannels;
+    var legendHtml = '';
+
+    for (var ci = 0; ci < channels.length; ci++) {
+      var ch = channels[ci];
+      var color = CHART_COLORS[ci % CHART_COLORS.length];
+
+      // Compute min/max for this channel in the slice
+      var chMin = Infinity, chMax = -Infinity;
+      for (var i = 0; i < historySlice.length; i++) {
+        var v = historySlice[i].data[ch];
+        if (v === undefined || v === 'NA') continue;
+        v = parseFloat(v);
+        if (isNaN(v)) continue;
+        if (v < chMin) chMin = v;
+        if (v > chMax) chMax = v;
+      }
+      if (!isFinite(chMin)) { chMin = 0; chMax = 1; }
+      if (chMin === chMax) { chMin -= 1; chMax += 1; }
+      var range = chMax - chMin;
+
+      // Draw sparkline
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.lineJoin = 'round';
+      var started = false;
+      for (var i = 0; i < historySlice.length; i++) {
+        var v = historySlice[i].data[ch];
+        if (v === undefined || v === 'NA') continue;
+        v = parseFloat(v);
+        if (isNaN(v)) continue;
+        var x = padLeft + ((historySlice[i].t - startMs) / rangeMs) * chartW;
+        var y = padTop + chartH - ((v - chMin) / range) * chartH;
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Fill area
+      if (started) {
+        ctx.lineTo(padLeft + chartW, padTop + chartH);
+        ctx.lineTo(padLeft, padTop + chartH);
+        ctx.closePath();
+        ctx.fillStyle = color.replace(')', ',0.06)').replace('rgb', 'rgba');
+        // Use a simpler approach for fill
+        ctx.globalAlpha = 0.08;
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      }
+
+      legendHtml += '<div class="chart-legend-item">' +
+        '<span class="chart-legend-swatch" style="background:' + color + '"></span>' +
+        ch +
+        '</div>';
+    }
+
+    $('#chartLegend').innerHTML = legendHtml;
+  }
+
+  function drawChartGrid(ctx, w, h, startMs, endMs) {
+    var padLeft = 60;
+    var padRight = 16;
+    var padTop = 16;
+    var padBottom = 30;
+    var chartW = w - padLeft - padRight;
+    var chartH = h - padTop - padBottom;
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#5A6A7A';
+    ctx.font = '10px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+
+    // Horizontal grid lines (5)
+    for (var i = 0; i <= 4; i++) {
+      var y = padTop + (chartH / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(padLeft, y);
+      ctx.lineTo(padLeft + chartW, y);
+      ctx.stroke();
+    }
+
+    // Time labels
+    ctx.textAlign = 'center';
+    var duration = endMs - startMs;
+    var steps = 5;
+    for (var i = 0; i <= steps; i++) {
+      var t = startMs + (duration / steps) * i;
+      var x = padLeft + (chartW / steps) * i;
+      var d = new Date(t);
+      var label = d.getMinutes().toString().padStart(2,'0') + ':' + d.getSeconds().toString().padStart(2,'0');
+      ctx.fillText(label, x, h - 8);
+
+      ctx.beginPath();
+      ctx.moveTo(x, padTop);
+      ctx.lineTo(x, padTop + chartH);
+      ctx.stroke();
+    }
+  }
+
+  function updateChartLegend() {
+    // Already updated in doRenderChart
+  }
+
+  // ============================================================
+  // CONFIG
+  // ============================================================
+  function updateConfigApplied() {
+    $('#cfgTempApplied').textContent = state.appliedConfig.SEUIL_TEMP_MAX.toFixed(1);
+    $('#cfgPressApplied').textContent = state.appliedConfig.SEUIL_PRESSION_MIN.toFixed(1);
+    $('#cfgCarbuApplied').textContent = state.appliedConfig.SEUIL_NIVEAU_MIN.toFixed(0);
+
+    // Also update sliders/inputs
+    $('#cfgTempSlider').value = state.appliedConfig.SEUIL_TEMP_MAX;
+    $('#cfgTempInput').value = state.appliedConfig.SEUIL_TEMP_MAX;
+    $('#cfgPressSlider').value = state.appliedConfig.SEUIL_PRESSION_MIN;
+    $('#cfgPressInput').value = state.appliedConfig.SEUIL_PRESSION_MIN;
+    $('#cfgCarbuSlider').value = state.appliedConfig.SEUIL_NIVEAU_MIN;
+    $('#cfgCarbuInput').value = state.appliedConfig.SEUIL_NIVEAU_MIN;
+  }
+
+  function applyConfig() {
+    var tempVal = safeFloat($('#cfgTempInput').value, state.appliedConfig.SEUIL_TEMP_MAX);
+    var pressVal = safeFloat($('#cfgPressInput').value, state.appliedConfig.SEUIL_PRESSION_MIN);
+    var carbuVal = safeFloat($('#cfgCarbuInput').value, state.appliedConfig.SEUIL_NIVEAU_MIN);
+
+    tempVal = clamp(tempVal, 0, 150);
+    pressVal = clamp(pressVal, 0, 10);
+    carbuVal = clamp(carbuVal, 0, 100);
+
+    showConfirm(
+      'Apply Thresholds',
+      'Send the following thresholds to the Arduino?<br><br>' +
+        '<strong>SEUIL_TEMP_MAX:</strong> ' + tempVal.toFixed(1) + ' °C<br>' +
+        '<strong>SEUIL_PRESSION_MIN:</strong> ' + pressVal.toFixed(1) + ' PSI<br>' +
+        '<strong>SEUIL_CARBU_MIN:</strong> ' + carbuVal.toFixed(0) + ' %',
+      function() {
+        sendSetTemp(tempVal.toFixed(1));
+        sendSetPress(pressVal.toFixed(1));
+        sendSetCarbu(carbuVal.toFixed(0));
+        state.appliedConfig.SEUIL_TEMP_MAX = tempVal;
+        state.appliedConfig.SEUIL_PRESSION_MIN = pressVal;
+        state.appliedConfig.SEUIL_NIVEAU_MIN = carbuVal;
+        updateConfigApplied();
+        addFrameLog('SYS', 'Config applied: TEMP=' + tempVal + ' PRESS=' + pressVal + ' CARBU=' + carbuVal);
+      }
+    );
+  }
+
+  // ============================================================
+  // CONFIRMATION MODAL
+  // ============================================================
+  var confirmCallback = null;
+
+  function showConfirm(title, body, callback) {
+    $('#confirmTitle').textContent = title;
+    $('#confirmBody').innerHTML = body;
+    confirmCallback = callback;
+    $('#confirmModal').classList.add('visible');
+  }
+
+  function hideConfirm() {
+    $('#confirmModal').classList.remove('visible');
+    confirmCallback = null;
+  }
+
+  // ============================================================
+  // BT DEVICE PICKER
+  // ============================================================
+  function showBtPicker() {
+    var devices = btGetPairedDevices();
+    var list = $('#btDeviceList');
+    if (devices.length === 0) {
+      list.innerHTML = '<div class="no-devices-msg">No paired devices found</div>';
+    } else {
+      var html = '';
+      for (var i = 0; i < devices.length; i++) {
+        var dev = devices[i];
+        html += '<div class="bt-device-item" data-address="' + escapeHtml(dev.address) + '">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="width:20px;height:20px;flex-shrink:0;"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>' +
+          '<div>' +
+            '<div class="bt-device-name">' + escapeHtml(dev.name || 'Unknown') + '</div>' +
+            '<div class="bt-device-addr">' + escapeHtml(dev.address) + '</div>' +
+          '</div>' +
+          '</div>';
+      }
+      list.innerHTML = html;
+
+      // Bind click
+      list.querySelectorAll('.bt-device-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          var addr = this.getAttribute('data-address');
+          var name = this.querySelector('.bt-device-name').textContent;
+          state.btDeviceAddr = addr;
+          state.btDeviceName = name;
+          hideBtPicker();
+          btConnect(addr);
+        });
+      });
+    }
+    $('#btPickerModal').classList.add('visible');
+  }
+
+  function hideBtPicker() {
+    $('#btPickerModal').classList.remove('visible');
+  }
+
+  // ============================================================
+  // EXPORT
+  // ============================================================
+  function exportCsv() {
+    if (state.history.length === 0) return;
+    var allKeys = CHANNEL_KEYS_C.concat(CHANNEL_KEYS_V).concat(ENGINE_KEYS).concat(GPS_KEYS);
+    var header = 'timestamp,' + allKeys.join(',');
+    var rows = [header];
+    for (var i = 0; i < state.history.length; i++) {
+      var entry = state.history[i];
+      var row = [new Date(entry.t).toISOString()];
+      for (var j = 0; j < allKeys.length; j++) {
+        row.push(entry.data[allKeys[j]]);
+      }
+      rows.push(row.join(','));
+    }
+    downloadFile(rows.join('\n'), 'enership_data.csv', 'text/csv');
+  }
+
+  function exportJson() {
+    if (state.history.length === 0) return;
+    var allKeys = CHANNEL_KEYS_C.concat(CHANNEL_KEYS_V).concat(ENGINE_KEYS).concat(GPS_KEYS);
+    var data = state.history.map(function(entry) {
+      var obj = { timestamp: new Date(entry.t).toISOString() };
+      for (var j = 0; j < allKeys.length; j++) {
+        obj[allKeys[j]] = entry.data[allKeys[j]];
+      }
+      return obj;
+    });
+    downloadFile(JSON.stringify(data, null, 2), 'enership_data.json', 'application/json');
+  }
+
+  function downloadFile(content, filename, mimeType) {
+    var blob = new Blob([content], { type: mimeType });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ============================================================
+  // CONNECTION STATS
+  // ============================================================
+  function updateConnStats() {
+    var display = $('#connStatsDisplay');
+    if (!display) return;
+    if (btIsAvailable() && state.connected) {
+      try {
+        var stats = window.AndroidBT.getConnectionStats();
+        var obj = JSON.parse(stats);
+        var html = '';
+        for (var key in obj) {
+          html += key + ': ' + obj[key] + '<br>';
+        }
+        display.innerHTML = html || 'No stats available';
+      } catch(e) {
+        display.textContent = 'Stats unavailable';
+      }
+    } else {
+      display.textContent = 'Not connected';
+    }
+  }
+
+  // ============================================================
+  // TAB NAVIGATION
+  // ============================================================
+  function switchTab(tabName) {
+    state.activeTab = tabName;
+    $$('.nav-item').forEach(function(item) {
+      item.classList.toggle('active', item.getAttribute('data-tab') === tabName);
+    });
+    $$('.tab-panel').forEach(function(panel) {
+      panel.classList.toggle('active', panel.id === 'tab-' + tabName);
+    });
+
+    // Re-render chart when switching to charts tab
+    if (tabName === 'charts') {
+      setTimeout(renderChart, 50);
+    }
+    if (tabName === 'diagnostics') {
+      updateConnStats();
+    }
+  }
+
+  // ============================================================
+  // INITIALIZATION
+  // ============================================================
+  function init() {
+    // Build UI
+    buildCurrentCards();
+    buildVoltageCards();
+    buildEngineCards();
+    buildGpsCards();
+    buildChannelSelector();
+
+    // Tab navigation
+    $$('.nav-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        switchTab(this.getAttribute('data-tab'));
+      });
+    });
+
+    // BT button
+    $('#btBtn').addEventListener('click', function() {
+      if (state.connected) {
+        btDisconnect();
+      } else if (!state.connecting && !state.reconnecting) {
+        if (btIsAvailable()) {
+          showBtPicker();
+        }
+      }
+    });
+
+    // BT picker cancel
+    $('#btPickerCancel').addEventListener('click', hideBtPicker);
+
+    // Reset alarm button
+    $('#resetAlarmBtn').addEventListener('click', function() {
+      sendResetAlarm();
+      addFrameLog('SYS', 'Reset alarm buzzer sent');
+    });
+
+    // Confirm modal
+    $('#confirmCancel').addEventListener('click', hideConfirm);
+    $('#confirmOk').addEventListener('click', function() {
+      if (confirmCallback) confirmCallback();
+      hideConfirm();
+    });
+
+    // Config sliders
+    $('#cfgTempSlider').addEventListener('input', function() {
+      $('#cfgTempInput').value = this.value;
+    });
+    $('#cfgTempInput').addEventListener('input', function() {
+      var v = clamp(safeFloat(this.value, 95), 0, 150);
+      $('#cfgTempSlider').value = v;
+    });
+    $('#cfgPressSlider').addEventListener('input', function() {
+      $('#cfgPressInput').value = this.value;
+    });
+    $('#cfgPressInput').addEventListener('input', function() {
+      var v = clamp(safeFloat(this.value, 1.5), 0, 10);
+      $('#cfgPressSlider').value = v;
+    });
+    $('#cfgCarbuSlider').addEventListener('input', function() {
+      $('#cfgCarbuInput').value = this.value;
+    });
+    $('#cfgCarbuInput').addEventListener('input', function() {
+      var v = clamp(safeFloat(this.value, 10), 0, 100);
+      $('#cfgCarbuSlider').value = v;
+    });
+
+    // Config apply
+    $('#cfgApplyBtn').addEventListener('click', applyConfig);
+    $('#cfgGetBtn').addEventListener('click', function() {
+      sendGetConf();
+      addFrameLog('SYS', 'Get config requested');
+    });
+
+    // Time range selector
+    $$('.time-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        $$('.time-btn').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        state.chartRange = parseInt(this.getAttribute('data-range'), 10);
+        renderChart();
+      });
+    });
+
+    // Export buttons
+    $('#exportCsvBtn').addEventListener('click', exportCsv);
+    $('#exportJsonBtn').addEventListener('click', exportJson);
+
+    // Diagnostics buttons
+    $('#diagPingBtn').addEventListener('click', function() {
+      sendPing();
+    });
+    $('#diagClearBtn').addEventListener('click', function() {
+      state.frameLog = [];
+      state.connLog = [];
+      renderFrameLog();
+      renderConnLog();
+    });
+
+    // Auto-reconnect toggle
+    $('#autoReconnectToggle').addEventListener('change', function() {
+      state.autoReconnect = this.checked;
+      btSetAutoReconnect(this.checked);
+      addConnLog('Auto-reconnect: ' + (this.checked ? 'enabled' : 'disabled'));
+    });
+
+    // Initialize applied config display
+    updateConfigApplied();
+
+    // Check initial BT state
+    if (btIsAvailable()) {
+      try {
+        state.connected = window.AndroidBT.isConnected();
+      } catch(e) {}
+    }
+    updateBtUI();
+
+    // Add initial connection log
+    addConnLog('EnerShip Travel initialized');
+
+    // Start periodic updates
+    setInterval(tickUpdate, 1000);
+    setInterval(function() { renderChart(); }, 2000);
+
+    // Initial dashboard render
+    updateDashboard();
+    updateAlarms();
+    updateAlarmBadge();
+  }
+
+  // Periodic tick — update uptime, rate, etc.
+  function tickUpdate() {
+    if (state.connectTime) {
+      $('#statUptime').textContent = formatUptime(now() - state.connectTime);
+    }
+    // Clean up rate window
+    var cutoff = now() - 60000;
+    while (state.rateWindow.length > 0 && state.rateWindow[0] < cutoff) {
+      state.rateWindow.shift();
+    }
+    var rate = state.rateWindow.length;
+    $('#statRate').innerHTML = rate + ' <small style="font-size:10px;">f/m</small>';
+
+    // Update conn stats periodically
+    if (state.activeTab === 'diagnostics') {
+      updateConnStats();
+    }
+  }
+
+  // ============================================================
+  // BOOT
+  // ============================================================
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+</body>
+</html>

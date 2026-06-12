@@ -1,0 +1,50 @@
+name: Build EnerShip APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses 2>/dev/null || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Locate APK
+        if: always()
+        run: |
+          echo "=== APK files found ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
+          echo "=== Build outputs ==="
+          ls -R app/build/outputs/ 2>/dev/null || echo "outputs dir not found"
+
+      - name: Upload APK (Debug)
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: EnerShip-debug
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
